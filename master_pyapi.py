@@ -11,11 +11,11 @@ import logging
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
+rand_dir: str = "C:/Users/peter/projects/assets/images/"
 
 class SharedData:
     def __init__(self):
-        self.base_dir = "C:/Users/xxxxxxxxx"
+        self.base_dir = "C:/Users/peter/projects/assets/images"
 
     @staticmethod
     def directory_exists(cur_dir):
@@ -96,6 +96,7 @@ class GetDirValidity(Resource):
     @staticmethod
     def get(directory):
         cur_dir = shared_data.base_dir + directory
+        logger.debug(cur_dir)
         return shared_data.directory_exists(cur_dir)
 
 
@@ -104,6 +105,19 @@ class GetSubDirs(Resource):
     def get():
         return [directory for directory in os.listdir(shared_data.base_dir) if
                 os.path.isdir(os.path.join(shared_data.base_dir, directory))]
+    
+class GetRandomImage(Resource):
+    @staticmethod
+    def get():
+        index = random.randint(0, len(os.listdir(rand_dir)) - 1)
+        logger.debug("in api")
+        logger.debug(f"index: {index}")
+        try:
+            return send_from_directory(rand_dir, os.listdir(rand_dir)[index])
+        except FileNotFoundError as e:
+            return {e}, 404
+        except Exception as e:
+            return {e}, 404
 
 
 api.add_resource(SpecificImg, '/api/img/<directory>/<int:img_index>', strict_slashes=False)
@@ -112,6 +126,7 @@ api.add_resource(FileMover, '/api/move-img/<directory>/<int:img_index>', strict_
 api.add_resource(DeleteImg, '/api/delete-img/<directory>/<int:img_index>', strict_slashes=False)
 api.add_resource(GetDirValidity, '/api/valid_dir/<directory>', strict_slashes=False)
 api.add_resource(GetSubDirs, '/api/info/', strict_slashes=False)
+api.add_resource(GetRandomImage, '/api/rnd-img', strict_slashes=False)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='192.168.xx.xx', port=5500)
+    app.run(debug=True, host='192.168.86.36', port=5500)
