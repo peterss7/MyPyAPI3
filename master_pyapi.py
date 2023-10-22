@@ -1,11 +1,8 @@
-from flask import Flask, request, jsonify, send_file, send_from_directory, abort
+from flask import Flask, request, send_from_directory, abort
 from flask_cors import CORS
 from flask_restful import Api, Resource
 import os
-import sys
-import json
 import random
-import base64
 import shutil
 import logging
 
