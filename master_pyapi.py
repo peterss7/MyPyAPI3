@@ -113,4 +113,4 @@ api.add_resource(GetSubDirs, '/api/info/', strict_slashes=False)
 api.add_resource(GetRandomImage, '/api/rnd-img', strict_slashes=False)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='192.168.86.36', port=5500)
+    app.run(debug=True, host='192.168.xx.xx', port=5500)
