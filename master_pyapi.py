@@ -11,46 +11,34 @@ import logging
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-rand_dir: str = "C:/Users/peter/projects/assets/images/"
-
-class SharedData:
-    def __init__(self):
-        self.base_dir = "C:/Users/peter/projects/assets/images"
-
-    @staticmethod
-    def directory_exists(cur_dir):
-        return os.path.exists(cur_dir) and os.path.isdir(cur_dir)
-
-
-shared_data = SharedData()
+base_dir: str = "C:/...../"
 app = Flask(__name__)
 api = Api(app)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+def directory_exists(cur_dir):
+    return os.path.exists(cur_dir) and os.path.isdir(cur_dir)
 
 
 class SpecificImg(Resource):
     @staticmethod
     def get(directory, img_index):
-        cur_dir = f"{shared_data.base_dir}{directory}"
+        cur_dir = f"{base_dir}{directory}"
         try:
             if cur_dir:
-                if not shared_data.directory_exists(cur_dir):
+                if not directory_exists(cur_dir):
                     raise FileNotFoundError
                 else:
                     img_filename = os.listdir(cur_dir)[img_index]
-                    if not img_filename:
-                        abort(404)
                     return send_from_directory(cur_dir, img_filename)
         except FileNotFoundError:
             return {"ERROR": "File not found."}, 404
-        except IndexError:
-            return {"ERROR": "Invalid index"}, 404
-
+        
 
 class DirectorySize(Resource):
     @staticmethod
     def get(directory):
-        cur_dir = f"{shared_data.base_dir}{directory}"
+        cur_dir = f"{base_dir}{directory}"
         return len(os.listdir(cur_dir))
 
 
@@ -58,15 +46,14 @@ class FileMover(Resource):
     @staticmethod
     def post(directory, img_index):
         data = request.json
-        logger.debug(f"data: {data}")
         target_dir_data = data.get('target')
         source_img_index = img_index
-        target_dir = f"{shared_data.base_dir}{target_dir_data}"
-        source_dir = f"{shared_data.base_dir}{directory}"
+        target_dir = f"{base_dir}{target_dir_data}"
+        source_dir = f"{base_dir}{directory}"
         try:
             source_img = os.listdir(source_dir)[source_img_index]
             destination_img = f"{target_dir}/{source_img}"
-            if not shared_data.directory_exists(target_dir):
+            if not directory_exists(target_dir):
                 os.makedirs(target_dir)
             source_path = f"{source_dir}/{source_img}"
             shutil.move(source_path, destination_img)
@@ -78,8 +65,8 @@ class FileMover(Resource):
 class DeleteImg(Resource):
     @staticmethod
     def delete(directory, img_index):
-        target_dir = f"{shared_data.base_dir}{directory}"
-        if not shared_data.directory_exists(target_dir):
+        target_dir = f"{base_dir}{directory}"
+        if not directory_exists(target_dir):
             return {"ERROR": f"Directory: {target_dir} does not exist."}, 404
         target_img = os.listdir(target_dir)[img_index]
         if not target_img:
@@ -95,25 +82,22 @@ class DeleteImg(Resource):
 class GetDirValidity(Resource):
     @staticmethod
     def get(directory):
-        cur_dir = shared_data.base_dir + directory
-        logger.debug(cur_dir)
-        return shared_data.directory_exists(cur_dir)
+        cur_dir = base_dir + directory
+        return directory_exists(cur_dir)
 
 
 class GetSubDirs(Resource):
     @staticmethod
     def get():
-        return [directory for directory in os.listdir(shared_data.base_dir) if
-                os.path.isdir(os.path.join(shared_data.base_dir, directory))]
+        return [directory for directory in os.listdir(base_dir) if
+                os.path.isdir(os.path.join(base_dir, directory))]
     
 class GetRandomImage(Resource):
     @staticmethod
     def get():
-        index = random.randint(0, len(os.listdir(rand_dir)) - 1)
-        logger.debug("in api")
-        logger.debug(f"index: {index}")
+        index = random.randint(0, len(os.listdir(base_dir)) - 1)
         try:
-            return send_from_directory(rand_dir, os.listdir(rand_dir)[index])
+            return send_from_directory(base_dir, os.listdir(base_dir)[index])
         except FileNotFoundError as e:
             return {e}, 404
         except Exception as e:
