@@ -6,18 +6,15 @@ import random
 import shutil
 import logging
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 base_dir: str = "C:/...../"
 app = Flask(__name__)
 api = Api(app)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-
 def directory_exists(cur_dir):
     return os.path.exists(cur_dir) and os.path.isdir(cur_dir)
-
 
 def get_rand_from_dir_tree(search_dir):
     try:
@@ -134,7 +131,6 @@ class GetRandomImageDeep(Resource):
     def get():
         try: 
             result = get_rand_from_dir_tree(dir)
-            
             if result is not None:
                 return  result
             else:
@@ -142,19 +138,14 @@ class GetRandomImageDeep(Resource):
         except RandomImageException as e:
             return {e}, 404
         
-        
 class RandomImageException(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
-
-api.add_resource(
-    SpecificImg, '/api/img/<directory>/<int:img_index>', strict_slashes=False)
+api.add_resource(SpecificImg, '/api/img/<directory>/<int:img_index>', strict_slashes=False)
 api.add_resource(DirectorySize, '/api/data/<directory>', strict_slashes=False)
-api.add_resource(
-    FileMover, '/api/move-img/<directory>/<int:img_index>', strict_slashes=False)
-api.add_resource(
-    DeleteImg, '/api/delete-img/<directory>/<int:img_index>', strict_slashes=False)
+api.add_resource(FileMover, '/api/move-img/<directory>/<int:img_index>', strict_slashes=False)
+api.add_resource(DeleteImg, '/api/delete-img/<directory>/<int:img_index>', strict_slashes=False)
 api.add_resource(GetDirValidity, '/api/valid_dir/<directory>', strict_slashes=False)
 api.add_resource(GetSubDirs, '/api/info/', strict_slashes=False)
 api.add_resource(GetRandomImage, '/api/rnd-img', strict_slashes=False)
