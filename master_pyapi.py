@@ -89,16 +89,16 @@ class GetSubDirs(Resource):
         return [directory for directory in os.listdir(base_dir) if
                 os.path.isdir(os.path.join(base_dir, directory))]
     
-class GetRandomImage(Resource):
+class GetRndDirImg(Resource):
     @staticmethod
-    def get():
-        index = random.randint(0, len(os.listdir(base_dir)) - 1)
-        try:
-            return send_from_directory(base_dir, os.listdir(base_dir)[index])
-        except FileNotFoundError as e:
-            return {e}, 404
-        except Exception as e:
-            return {e}, 404
+    def get(directory):
+        pic_dir = f'<base-dir>/{directory}'
+        subs = [sub for sub in os.listdir(pic_dir) if os.path.isfile(os.path.join(pic_dir, sub)) and sub[-3:] == 'png']
+        sub_num = len(subs)
+        sub = subs[random.randint(0, sub_num - 1)]
+        print(f'final URL: {sub}')
+        return send_from_directory(pic_dir, sub)
+
 
 
 api.add_resource(SpecificImg, '/api/img/<directory>/<int:img_index>', strict_slashes=False)
@@ -107,7 +107,7 @@ api.add_resource(FileMover, '/api/move-img/<directory>/<int:img_index>', strict_
 api.add_resource(DeleteImg, '/api/delete-img/<directory>/<int:img_index>', strict_slashes=False)
 api.add_resource(GetDirValidity, '/api/valid_dir/<directory>', strict_slashes=False)
 api.add_resource(GetSubDirs, '/api/info/', strict_slashes=False)
-api.add_resource(GetRandomImage, '/api/rnd-img', strict_slashes=False)
+api.add_resource(GetRndDirImg, '/api/rnd-img', strict_slashes=False)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='192.168.xx.xx', port=5500)
+    app.run(debug=True, host='<ip address>', port='<port>')
